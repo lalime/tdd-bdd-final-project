@@ -105,6 +105,42 @@ def step_impl(context, element_name):
 ##################################################################
 
 ## UPDATE CODE HERE ##
+@when(u'I press the "{button}" button')
+def step_impl(context, button):
+    context.driver.find_element_by_id(f"{button.lower()}-btn") 
+
+@then('I should see the message "{message}"')
+def step_impl(context, message):
+    found = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.text_to_be_present_in_element(
+            (By.ID, 'flash_message'),
+            message
+        )
+    )
+    assert(found)
+
+@when(u'I edit the "Price" field to "{new_price}"')
+def step_impl(context):
+    context.driver.find_element_by_id(f"product_{field.lower()}").value = value
+
+@when(u'I should see "{value}" in the "{field}" field')
+def step_impl(context, value, field):
+    context.driver.find_element_by_id(f"product_{field.lower()}").value == value
+
+@then(u'I should see "{name}" in the results')
+def step_impl(context):
+    found = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.text_to_be_present_in_element(
+            (By.ID, 'search_results'),
+            name
+        )
+    )
+    assert(found)
+
+@then(u'I should not see "{name}" in the results')
+def step_impl(context):
+    element = context.driver.find_element_by_id('search_results')
+    assert(name not in element.text)
 
 ##################################################################
 # This code works because of the following naming convention:

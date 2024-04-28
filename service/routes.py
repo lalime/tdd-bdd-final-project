@@ -18,6 +18,7 @@
 """
 Product Store Service with UI
 """
+import json
 from flask import jsonify, request, abort
 from flask import url_for  # noqa: F401 pylint: disable=unused-import
 from service.models import Product
@@ -86,43 +87,81 @@ def create_products():
 
     message = product.serialize()
 
-    #
-    # Uncomment this line of code once you implement READ A PRODUCT
-    #
-    # location_url = url_for("get_products", product_id=product.id, _external=True)
-    location_url = "/"  # delete once READ is implemented
+    location_url = url_for("get_products", product_id=product.id, _external=True)
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
 
 ######################################################################
 # L I S T   A L L   P R O D U C T S
 ######################################################################
+@app.route("/products")
+def list_products():
+    """
+    List all Product
+    This endpoint will read a Product based on the ID send in url
+    """
+    app.logger.info("------ Fetch all products")
+    rows = Product.all()
 
-#
-# PLACE YOUR CODE TO LIST ALL PRODUCTS HERE
-#
+    app.logger.info("------ Products found!", rows)
+    return json.dumps(rows, default=Product.serialize), status.HTTP_200_OK
+
 
 ######################################################################
 # R E A D   A   P R O D U C T
 ######################################################################
+@app.route("/products/<product_id>")
+def get_products(product_id):
+    """
+    Read a Product
+    This endpoint will read a Product based on the ID send in url
+    """
+    app.logger.info("---+++++++--- Find product by id [%s]", id)
+    response = Product.find(product_id)
+    if response is None:
+        return "Product not found", status.HTTP_404_NOT_FOUND
 
-#
-# PLACE YOUR CODE HERE TO READ A PRODUCT
-#
+    app.logger.info("------ Product with id [%s] found!", id)
+    return jsonify(response.serialize()), status.HTTP_200_OK
+
 
 ######################################################################
 # U P D A T E   A   P R O D U C T
 ######################################################################
+@app.route("/products/<product_id>", methods=["PUT"])
+def update_product(product_id):
+    """
+    Update a Product
+    This endpoint will read a Product based on the ID send in url
+    """
+    app.logger.info("Request to Update a Product with id [%s] ", product_id)
+    check_content_type("application/json")
 
-#
-# PLACE YOUR CODE TO UPDATE A PRODUCT HERE
-#
+    data = request.get_json()
+    app.logger.info("Processing: %s", data)
+    product = Product.find(product_id)
+    product.deserialize(data)
+    product.update()
+    app.logger.info("Product with id [%s] updated!", product.id)
+
+    message = product.serialize()
+
+    location_url = url_for("get_products", product_id=product.id, _external=True)
+    return jsonify(message), status.HTTP_200_OK, {"Location": location_url}
+
 
 ######################################################################
 # D E L E T E   A   P R O D U C T
 ######################################################################
+@app.route("/products/<product_id>", methods=["DELETE"])
+def delete_product(product_id):
+    """
+    Read a Product
+    This endpoint will read a Product based on the ID send in url
+    """
+    app.logger.info("---+++++++--- Delete product by id [%s]", product_id)
+    product = Product.find(product_id)
+    product.delete()
 
-
-#
-# PLACE YOUR CODE TO DELETE A PRODUCT HERE
-#
+    app.logger.info("------ Product with id [%s] deleted!", product_id)
+    return jsonify(status=204, message="NO_CONTENT"), status.HTTP_204_NO_CONTENT
