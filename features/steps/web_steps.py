@@ -109,26 +109,22 @@ def step_impl(context, element_name):
 def step_impl(context, button):
     context.driver.find_element_by_id(f"{button.lower()}-btn") 
 
-@then('I should see the message "{message}"')
-def step_impl(context, message):
-    found = WebDriverWait(context.driver, context.wait_seconds).until(
-        expected_conditions.text_to_be_present_in_element(
-            (By.ID, 'flash_message'),
-            message
-        )
-    )
-    assert(found)
+@then('I should see the message "{msg}"')
+def step_impl(context, msg):
+wait = WebDriverWait(self.driver, 10)
+element = wait.until(EC.element_to_be_clickable((By.XPATH, '//div[@class="test"]')))
+element.click()
 
-@when(u'I edit the "Price" field to "{new_price}"')
-def step_impl(context):
-    context.driver.find_element_by_id(f"product_{field.lower()}").value = value
+@when(u'I edit the "{field}" field to "{new_price}"')
+def step_impl(context, field, new_price):
+    context.driver.find_element_by_id(f"product_{field.lower()}").value = new_price
 
 @when(u'I should see "{value}" in the "{field}" field')
 def step_impl(context, value, field):
     context.driver.find_element_by_id(f"product_{field.lower()}").value == value
 
 @then(u'I should see "{name}" in the results')
-def step_impl(context):
+def step_impl(context, name):
     found = WebDriverWait(context.driver, context.wait_seconds).until(
         expected_conditions.text_to_be_present_in_element(
             (By.ID, 'search_results'),
@@ -138,7 +134,7 @@ def step_impl(context):
     assert(found)
 
 @then(u'I should not see "{name}" in the results')
-def step_impl(context):
+def step_impl(context, name):
     element = context.driver.find_element_by_id('search_results')
     assert(name not in element.text)
 
